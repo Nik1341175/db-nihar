@@ -1,19 +1,25 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-from numpy.random import default_rng as rng
 
-@st.cache_resource
-def connect_to_pukki():
-    return psycopg2.connect(
-        host=st.secrets["db"]["host"],
-        port=st.secrets["db"]["port"],
-        dbname=st.secrets["db"]["dbname"],
-        user=st.secrets["db"]["user"],
-        password=st.secrets["db"]["password"],
-        sslmode="require"
-    )
+# Get the data
+@st.cache_data
+def get_data():
+    df = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/refs/heads/master/titanic.csv")
+    st.write("dataset import done")
+    return df
 
-conn = connect_to_pukki()
-df = pd.read_sql("SELECT * FROM demo", conn)
-st.dataframe(df)
+df = get_data()
+
+# Display the data
+st.dataframe(df.head(5))
+
+# Select column
+option = st.selectbox("Select column", ("survived", "sex", "class"))
+# Display selectec column
+st.write(option)
+# Count values in the column
+selected_count = df[option].value_counts()
+# Display value_count data
+st.write(selected_count)
+# Display bar chart horizontally
+st.bar_chart(selected_count, horizontal=True)
